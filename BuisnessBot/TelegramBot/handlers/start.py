@@ -9,6 +9,20 @@ model = config('MODEL')
 
 start_router = Router()
 
+def get_resp(message):
+    print('try to get response')
+    response = ollama.chat(
+        model = model,
+        messages=[
+            {'role': 'system', 'content': 'Ты - помощник в крупной IT-компании. К тебе могут обращаться как сотрудники компании, так и ее клиенты. Твоя задача - давать понятные всем инструкции по решению их проблем'},
+            {'role': 'user', 'content': message}
+        ],
+        stream=False
+    )
+    print(f'response was gotten \n {response}')
+    return str(response['message']['content'])
+
+
 @start_router.message(CommandStart())
 async def start(message: Message):
     await message.answer('Здравствуйте, бот готов к работе. Можете задавать свой вопрос.')
@@ -17,18 +31,10 @@ async def start(message: Message):
 async def help(message: Message):
     await message.answer(str(help.readlines()))
     
-
 @start_router.message(F.text)
 async def question(message: Message):
     try:
-        response = ollama.generate(
-            model = model,
-            messages=[
-                {'role': 'system', 'content': 'Ты - помощник в крупной IT-компании. К тебе могут обращаться как сотрудники компании, так и ее клиенты. Твоя задача - давать понятные всем инструкции по решению их проблем'},
-                {'role': 'user', 'content': message.text}
-            ]
-        )
-        print(response)
-        await message.answer(response['message']['content'])
+        await message.answer('Ответ подготавливается...')
+        await message.answer(get_resp(message.text))
     except:
        await message.answer('Во время получения ответа произошла ошибка, повторите попытку позже.')
