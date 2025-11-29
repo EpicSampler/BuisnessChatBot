@@ -1,0 +1,1 @@
+aiogram, ollama, django
