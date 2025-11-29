@@ -4,10 +4,16 @@ from aiogram.types import Message
 import ollama
 from decouple import config
 import textwrap
+import os
 
+BASE_DIR = os.getcwd()
+gg = os.path.join(BASE_DIR, 'BuisnessBot', 'TelegramBot', 'handlers', 'txts', 'help.txt')
+fil = open(gg, 'r', encoding='UTF-8')
+helpf = ''
+for i in fil.readlines():
+    helpf += i
+fil.close()
 
-
-help = open('C:/Users/mm1/Desktop/Buisness Chat Bot/BuisnessChatBot/BuisnessBot/TelegramBot/handlers/txts/help.txt', 'r')
 model = config('MODEL')
 
 start_router = Router()
@@ -31,9 +37,9 @@ def get_resp(message):
 async def start(message: Message):
     await message.answer('Здравствуйте, бот готов к работе. Можете задавать свой вопрос.')
 
-@start_router.message(Command('/help'))
-async def help(message: Message):
-    await message.answer(str(help.readlines()))
+@start_router.message(Command('help'))
+async def send_help(message: Message):
+    await message.answer(helpf)
     
 @start_router.message(F.text)
 async def question(message: Message):
@@ -42,7 +48,7 @@ async def question(message: Message):
 
         answer = get_resp(message.text)
         
-        answers = textwrap.wrap(answer, 4096)
+        answers = textwrap.wrap(answer, 4000)
 
         for i in answers:
             await message.answer(i)
