@@ -6,13 +6,13 @@ from decouple import config
 import textwrap
 import os
 
-BASE_DIR = os.getcwd()
-gg = os.path.join(BASE_DIR, 'BuisnessBot', 'TelegramBot', 'handlers', 'txts', 'help.txt')
-fil = open(gg, 'r', encoding='UTF-8')
-helpf = ''
-for i in fil.readlines():
-    helpf += i
-fil.close()
+# BASE_DIR = os.getcwd()
+# gg = os.path.join(BASE_DIR, 'BuisnessBot', 'TelegramBot', 'handlers', 'txts', 'help.txt')
+# fil = open(gg, 'r', encoding='UTF-8')
+# helpf = ''
+# for i in fil.readlines():
+#     helpf += i
+# fil.close()
 
 model = config('MODEL')
 
@@ -39,7 +39,7 @@ async def start(message: Message):
 
 @start_router.message(Command('help'))
 async def send_help(message: Message):
-    await message.answer(helpf)
+    await message.answer('ghbdtn')
     
 @start_router.message(F.text)
 async def question(message: Message):
