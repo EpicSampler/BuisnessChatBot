@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 import ollama
 import textile
 from .form import SignUpForm, LoginForm
+from TelegramBot.models import Answers, Users, Organisations
 
 model ='deepseek-v3.1:671b-cloud'
 
@@ -18,6 +19,9 @@ def get_resp(message):
         stream=False
     )
     answer = response['message']['content']
+
+    Answers.objects.create(question=message, answer=answer)
+
     return answer
 
 def answer(request):
@@ -32,34 +36,46 @@ def home(request):
     return render(request, 'home.html')
 
 def signup(request):
-    if request.method == 'POST':
+    if request.method == 'GET':
         form = SignUpForm(request.POST)
         if form.is_valid():
+
+            s = Organisations()
+            s.objects.create(name=request['name'], city=request['city'], director=request['2Name'] + request['Name'] + request['LastName'])   
+            s.save() 
+
             user = form.save()          
-            login(request['csrfmiddlewaretoken'], user)        
+            login(request['csrfmiddlewaretoken'], user)    
             return redirect('/.') 
     else:
         form = SignUpForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': request})
 
 def login(request):
-    username = ''
-    password = ''
-    secretcode = ''
-    form = LoginForm(data=request.POST or None)
-    if request.method == 'POST':
+    form = LoginForm(data=request.GET or None)
+    if request.method == 'GET':
         if form.is_valid():
-            username = form.cleaned_data['name']
-            password = form.cleaned_data['password']
-            secretcode = form.cleaned_data['code']
-            user = authenticate(username=username, password=password, code=secretcode)
+            username = form.cleaned_data['2Name'] + form.cleaned_data['Name'] + form.cleaned_data['LastName']
+            password = form.cleaned_data['Password']
+            email = form.cleaned_data['Email']
+            secretcode = form.cleaned_data['SecretCode']
+
+            print(username, password, email, secretcode)
+
+            s = Users()
+            if s.objects.check(specialcode = secretcode, name = username, email = email) == True:
+                user = authenticate(username=username, password=password, code=secretcode)
+            else:
+                return render(request, 'login.html', {'message': (username, password, email, secretcode)})
             
             if user is not None:
                 login(request, user) 
                     
-                return redirect('home')  
-    redirect('/./profile')
-    return render(request, 'profile.html', {'name': username})
+                return redirect('/./profile')  
+    return render(request, 'login.html')
 
 def profile(request):
     return render(request, 'profile.html')
+
+def about(request):
+    return render(request, 'about.html')

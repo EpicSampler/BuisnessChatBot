@@ -19,7 +19,7 @@ from django.urls import path
 from .views import answer
 from .views import home
 from .views import signup
-from .views import login, profile
+from .views import login, profile, about
 
 urlpatterns = [
     path('', home, name='home'),
@@ -27,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('signup/', signup, name='signup'),
     path('login/', login, name='login'),
-    path('profile/', profile, name='profile')
+    path('profile/', profile, name='profile'),
+    path('about/', about, name='about')
 
 ]
