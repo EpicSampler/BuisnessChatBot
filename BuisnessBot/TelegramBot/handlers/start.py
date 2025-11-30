@@ -5,6 +5,7 @@ import ollama
 from decouple import config
 import textwrap
 import os
+from models import Answers
 
 # BASE_DIR = os.getcwd()
 # gg = os.path.join(BASE_DIR, 'BuisnessBot', 'TelegramBot', 'handlers', 'txts', 'help.txt')
@@ -18,20 +19,23 @@ model = config('MODEL')
 
 start_router = Router()
 
+s = Answers.objects.get()
+
 def get_resp(message):
     print('try to get response')
     response = ollama.chat(
         model = model,
         messages=[
-            {'role': 'system', 'content': 'Ты - помощник в крупной IT-компании. К тебе могут обращаться как сотрудники компании, так и ее клиенты. Твоя задача - давать понятные всем инструкции по решению их проблем, используй сдержанный язык - без восклицаний, только официально-деловой стиль'},
+            {'role': 'system', 'content': 'Ты - помощник в крупной IT-компании. К тебе могут обращаться как сотрудники компании, так и ее клиенты. Твоя задача - давать понятные всем инструкции по решению их проблем, используй сдержанный язык - без восклицаний, только официально-деловой стиль. Краткая инструкция по написанию сообщений: чтобы сделать текст жирным, напиши "<b>НУЖНЫЙ ТЕКСТ</b>", курсивным - "<i>НУЖНЫЙ ТЕКСТ</i>", когда нужно вставить код - "<pre language="НУЖНЫЙ ЯЗЫК">КОД</pre>", когда нужно сделать нужно сделать абзац, в конце последнего абзаца поставь "\n"'},
             {'role': 'user', 'content': message}
         ],
         stream=False
     )
 
+    s.question = message
+
     answer = response['message']['content']
     return answer
-
 
 @start_router.message(CommandStart())
 async def start(message: Message):
@@ -47,8 +51,10 @@ async def question(message: Message):
         await message.answer('Ответ подготавливается...')
 
         answer = get_resp(message.text)
-        
         answers = textwrap.wrap(answer, 4000)
+
+        s.answer = answer
+        s.save()
 
         for i in answers:
             await message.answer(i)

@@ -1,1 +1,6 @@
-aiogram, ollama, django, decouple
+aiogram
+ollama
+django
+python-decouple
+apscheduler
+textile
